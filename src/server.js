@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 
 const allowedOrigin =
-  config.env == "development" ? "http://localhost:3000" : "#";
+  config.env == "development" ? "http://localhost:3000" : "https://https://collab-rnvfzhcqt-bryantellius.vercel.app";
 const io = new Server(server, { cors: { origin: allowedOrigin } });
 
 io.on("connection", (socket) => {
