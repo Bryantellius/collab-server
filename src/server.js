@@ -16,11 +16,7 @@ const server = http.createServer(app);
 const allowedOrigin =
   config.env == "development"
     ? "http://localhost:3000"
-    : [
-        "https://collab-rnvfzhcqt-bryantellius.vercel.app",
-        "https://collab-bryantellius.vercel.app/",
-        "https://collab-git-main-bryantellius.vercel.app/",
-      ];
+    : "*";
 const io = new Server(server, { cors: { origin: allowedOrigin } });
 
 io.on("connection", (socket) => {
