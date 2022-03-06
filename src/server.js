@@ -3,20 +3,21 @@ const http = require("http");
 const fetch = require("isomorphic-fetch");
 const cors = require("cors");
 const helmet = require("helmet");
+const { MongoClient } = require("mongodb");
 
 const { Server } = require("socket.io");
 
 const config = require("../config");
 const { getLangExt } = require("./utils/code");
 
+const client = new MongoClient(config.mongo.uri);
+let db;
 const app = express();
 
 const server = http.createServer(app);
 
 const allowedOrigin =
-  config.env == "development"
-    ? "http://localhost:3000"
-    : "*";
+  config.env == "development" ? "http://localhost:3000" : "*";
 const io = new Server(server, { cors: { origin: allowedOrigin } });
 
 io.on("connection", (socket) => {
@@ -78,6 +79,15 @@ app.use((req, res, next) => {
   }
 });
 
-server.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}...`);
+server.listen(config.port, async () => {
+  console.log(`✅ Server running on port ${config.port}...`);
+
+  // Connect to Mongodb
+  try {
+    await client.connect();
+    db = client.db("collab");
+    console.log("✅ App connected to mongodb")
+  } catch (e) {
+    console.error(e);
+  }
 });

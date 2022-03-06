@@ -16,6 +16,7 @@
     "express": "^4.17.3",
     "helmet": "^5.0.2",
     "isomorphic-fetch": "^3.0.0",
+    "mongodb": "^4.4.1",
     "socket.io": "^4.4.1"
   },
   "devDependencies": {
