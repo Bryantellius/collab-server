@@ -17,7 +17,7 @@ const langs = {
   java: {
     ext: ".java",
     abbr: "java",
-    default: `class HelloWorld {
+    default: `class Main {
     public static void main(String[] args) {
         System.out.println("Hello, World!"); 
     }
