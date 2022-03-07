@@ -11,4 +11,9 @@ module.exports = {
     run_url: process.env.GLOT_RUN_URL,
     token: process.env.GLOT_TOKEN,
   },
+  mongo: {
+    uri: process.env.MONGODB_URI,
+    db: process.env.MONGODB,
+    collection: process.env.MONGODB_COLLECTION,
+  },
 };
