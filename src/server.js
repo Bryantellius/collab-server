@@ -9,6 +9,8 @@ const routes = require("./routes");
 
 const app = express();
 
+console.log(config.mongo.uri)
+
 const client = new MongoClient(config.mongo.uri);
 
 const server = http.createServer(app);
