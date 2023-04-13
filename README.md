@@ -1,5 +1,7 @@
 # Collab Backend
 
-## About Socket.io
+👷 Under Construction
 
-A _socket_ is a connection on a given network. A socket remains open/persistent until the socket is terminated, allowing you to send real-time data between client and server instantaneously.
+Resources
+
+- [JWT, Access Tokens, Refresh Tokens: Best Practices](https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/)
