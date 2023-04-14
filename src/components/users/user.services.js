@@ -2,11 +2,11 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
+const config = require("../../../config");
 const { isValidId } = require("../../shared/db/db.utils");
 const { sendEmail } = require("../../shared/emailer");
 const UserModel = require("./user.model");
 const RefreshTokenModel = require("../tokens/refreshToken.model");
-const config = require("../../../config");
 
 // TODO: jsDoc all
 

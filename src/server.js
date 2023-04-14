@@ -25,7 +25,7 @@ app.use(httpLogger);
 
 // routes
 app.use("/api/v1", routes);
-app.get("/", swaggerRouter);
+app.use("/", swaggerRouter);
 
 // Default Display for any request not matching /api...
 app.use((req, res, next) => {

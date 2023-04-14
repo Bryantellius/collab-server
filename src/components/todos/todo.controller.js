@@ -6,8 +6,18 @@ const { authorize } = require("../users/user.middleware");
 const router = Router();
 
 // protects all following routes with auth check
-router.use(authorize());
+// router.use(authorize());
 
+/**
+ * @openapi
+ * /todos:
+ *   get:
+ *     summary: Retrieve a list of todo items for a given user
+ *     description: Returns a list of todo items
+ *     responses:
+ *       200:
+ *         description: Returns a mysterious string.
+ */
 router.get("/", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -20,6 +30,15 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * /todos/{id}:
+ *   get:
+ *     description: Welcome to swagger-jsdoc!
+ *     responses:
+ *       200:
+ *         description: Returns a mysterious string.
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -34,6 +53,10 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * TODO
+ */
 router.post("/", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -54,6 +77,10 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * TODO
+ */
 router.put("/:id", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -82,6 +109,10 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * TODO
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     let { username } = req.user;

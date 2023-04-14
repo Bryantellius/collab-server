@@ -21,6 +21,9 @@ function authorize(roles = []) {
     // authorize based on user role
     async function (req, res, next) {
       try {
+        if (!req.auth)
+          throw new Error("You must be logged in to access this content.");
+
         const userDTO = await UserModel.findById(req.auth.id);
         const refreshTokens = await RefreshTokenModel.find({
           userId: userDTO.id,
@@ -157,7 +160,9 @@ function validateCreateSchema(req, res, next) {
       email: Joi.string().email().required(),
       password: Joi.string().min(6).required(),
       confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
-      role: Joi.string().valid(config.constants.roles.ADMIN, config.constants.roles.USER).required(),
+      role: Joi.string()
+        .valid(config.constants.roles.ADMIN, config.constants.roles.USER)
+        .required(),
     });
 
     let validatedSchema = validateSchema(req.body, schema);

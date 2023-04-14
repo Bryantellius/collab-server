@@ -17,10 +17,6 @@ const {
 
 const router = Router();
 
-/**
- * @openapi
- * TODO
- */
 router.post(
   "/authenticate",
   validateAuthenticationSchema,
@@ -80,10 +76,6 @@ router.post(
   }
 );
 
-/**
- * @openapi
- * TODO
- */
 router.post("/register", validateRegisterSchema, async (req, res, next) => {
   try {
     await userService.register(req.body, req.get("origin"));
@@ -96,10 +88,6 @@ router.post("/register", validateRegisterSchema, async (req, res, next) => {
   }
 });
 
-/**
- * @openapi
- * TODO
- */
 router.post(
   "/verify-email",
   validateEmailVerificationSchema,
@@ -154,10 +142,6 @@ router.post(
   }
 );
 
-/**
- * @openapi
- * TODO
- */
 router.get(
   "/",
   authorize(config.constants.roles.ADMIN),
@@ -171,10 +155,6 @@ router.get(
   }
 );
 
-/**
- * @openapi
- * TODO
- */
 router.get("/:id", authorize(), async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -193,10 +173,6 @@ router.get("/:id", authorize(), async (req, res, next) => {
   }
 });
 
-/**
- * @openapi
- * TODO
- */
 router.post(
   "/",
   authorize(config.constants.roles.ADMIN),
@@ -211,29 +187,29 @@ router.post(
   }
 );
 
-/**
- * @openapi
- * TODO
- */
-router.put("/:id", authorize(), validateUpdateSchema, async (req, res, next) => {
-  try {
-    const id = req.params.id;
+router.put(
+  "/:id",
+  authorize(),
+  validateUpdateSchema,
+  async (req, res, next) => {
+    try {
+      const id = req.params.id;
 
-    if (id !== req.auth.id && req.auth.role !== config.constants.roles.ADMIN) {
-      return res.status(401).json({ message: "Unauthorized" });
+      if (
+        id !== req.auth.id &&
+        req.auth.role !== config.constants.roles.ADMIN
+      ) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let result = await userService.update(id, req.body);
+      res.json(result);
+    } catch (err) {
+      next(err);
     }
-
-    let result = await userService.update(id, req.body);
-    res.json(result);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
-/**
- * @openapi
- * TODO
- */
 router.delete("/:id", authorize(), async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -249,10 +225,6 @@ router.delete("/:id", authorize(), async (req, res, next) => {
   }
 });
 
-/**
- * @openapi
- * TODO
- */
 function setTokenCookie(res, token) {
   // create cookie with refresh token that expires in 7 days
   const cookieOptions = {
