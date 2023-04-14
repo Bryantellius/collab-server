@@ -1,12 +1,12 @@
 const { Router } = require("express");
 
-const TodoModel = require("./todoModel");
-const { isLoggedIn } = require("../users/userMiddleware");
+const TodoModel = require("./todo.model");
+const { authorize } = require("../users/user.middleware");
 
 const router = Router();
 
 // protects all following routes with auth check
-router.use(isLoggedIn);
+router.use(authorize());
 
 router.get("/", async (req, res, next) => {
   try {
