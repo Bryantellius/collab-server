@@ -14,6 +14,7 @@ const {
   validateCreateSchema,
   validateUpdateSchema,
 } = require("./user.middleware");
+const { UnauthorizedError, ValidationError } = require("../../shared/errors");
 
 const router = Router();
 
@@ -32,7 +33,7 @@ router.post(
       });
 
       setTokenCookie(res, result.refreshToken);
-      res.json(result);
+      res.customJson(result);
     } catch (err) {
       next(err);
     }
@@ -45,7 +46,7 @@ router.post("/refresh-token", async (req, res, next) => {
     const ipAddress = req.ip;
     const result = await userService.refreshToken({ token, ipAddress });
     setTokenCookie(res, result.refreshToken);
-    res.json(result);
+    res.customJson(result);
   } catch (err) {
     next(err);
   }
@@ -60,16 +61,16 @@ router.post(
       const token = req.body.token || req.cookies.refreshToken;
       const ipAddress = req.ip;
 
-      if (!token) throw new Error("Token is required");
+      if (!token) throw new ValidationError("Token is required");
 
       if (
         !req.auth.ownsToken(token) &&
         req.auth.role !== config.constants.roles.ADMIN
       )
-        throw new Error("Unauthorized");
+        throw new UnauthorizedError("Unauthorized");
 
       await userService.revokeToken({ token, ipAddress });
-      res.json({ message: "Token revoked" });
+      res.customJson({ message: "Token revoked" });
     } catch (err) {
       next(err);
     }
@@ -79,7 +80,7 @@ router.post(
 router.post("/register", validateRegisterSchema, async (req, res, next) => {
   try {
     await userService.register(req.body, req.get("origin"));
-    res.json({
+    res.customJson({
       message:
         "Registration successful, please check your email for verification instructions",
     });
@@ -94,7 +95,9 @@ router.post(
   async (req, res, next) => {
     try {
       await userService.verifyEmail(req.body);
-      res.json({ message: "Verification successful. Proceed to login." });
+      res.customJson({
+        message: "Verification successful, you can now login.",
+      });
     } catch (err) {
       next(err);
     }
@@ -107,7 +110,7 @@ router.post(
   async (req, res, next) => {
     try {
       await userService.forgotPassword(req.body, req.get("origin"));
-      res.json({
+      res.customJson({
         message: "Please check your email for password reset instructions",
       });
     } catch (err) {
@@ -122,7 +125,7 @@ router.post(
   async (req, res, next) => {
     try {
       await userService.validateResetToken(req.body);
-      res.json({ message: "Token is valid" });
+      res.customJson({ message: "Token is valid" });
     } catch (err) {
       next(err);
     }
@@ -135,7 +138,9 @@ router.post(
   async (req, res, next) => {
     try {
       await userService.resetPassword(req.body);
-      res.json({ message: "Password reset successfully. Proceed to login." });
+      res.customJson({
+        message: "Password reset successfully. Proceed to login.",
+      });
     } catch (err) {
       next(err);
     }
@@ -148,7 +153,7 @@ router.get(
   async (req, res, next) => {
     try {
       let result = await userService.getAll();
-      res.json(result);
+      res.customJson(result);
     } catch (err) {
       next(err);
     }
@@ -161,13 +166,14 @@ router.get("/:id", authorize(), async (req, res, next) => {
 
     // users can get their own account and admins can get any account
     if (id !== req.auth.id && req.auth.role !== config.constants.roles.ADMIN) {
-      return res.status(401).json({ message: "Unauthorized" });
+      throw new UnauthorizedError();
     }
 
     let result = await userService.getUserById(id);
 
-    if (!result) res.status(404).json({});
-    else res.json(result);
+    if (!result)
+      res.status(404).customJson({ message: "No user found" }, false);
+    else res.customJson(result);
   } catch (err) {
     next(err);
   }
@@ -180,7 +186,7 @@ router.post(
   async (req, res, next) => {
     try {
       let result = await userService.create(req.body);
-      res.json(result);
+      res.customJson(result);
     } catch (err) {
       next(err);
     }
@@ -199,11 +205,11 @@ router.put(
         id !== req.auth.id &&
         req.auth.role !== config.constants.roles.ADMIN
       ) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).customJson({ message: "Unauthorized" }, false);
       }
 
       let result = await userService.update(id, req.body);
-      res.json(result);
+      res.customJson(result);
     } catch (err) {
       next(err);
     }
@@ -215,11 +221,11 @@ router.delete("/:id", authorize(), async (req, res, next) => {
     const id = req.params.id;
 
     if (id !== req.auth.id && req.auth.role !== config.constants.roles.ADMIN) {
-      return res.status(401).json({ message: "Unauthorized" });
+      throw new UnauthorizedError();
     }
 
     await userService.remove(id);
-    res.json({ message: "User deleted successfully." });
+    res.customJson({ message: "User deleted successfully." });
   } catch (err) {
     next(err);
   }

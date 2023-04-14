@@ -3,17 +3,40 @@
   "info": {
     "title": "Collab API",
     "description": "API service for projects",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "contact": { "email": "brbryant2639@gmail.com" }
   },
   "servers": [
     {
       "url": "http://localhost:8080",
       "description": "Local development server"
+    },
+    {
+      "url": "https://mywebsite.com",
+      "description": "Live address for api resource"
+    }
+  ],
+  "host": "mywebsite.com",
+  "basePath": "/api/v1",
+  "schemes": ["http", "https"],
+  "tags": [
+    {
+      "name": "users",
+      "description": "Operations for user account management and authentication."
+    },
+    {
+      "name": "todos",
+      "description": "Operations for todo task management."
+    },
+    {
+      "name": "watchlist",
+      "description": "Operations for movie watchlist management."
     }
   ],
   "paths": {
     "/users/authenticate": {
       "post": {
+        "tags": ["users"],
         "summary": "Authenticate user credentials and return a JWT token and a cookie with a refresh token",
         "description": "Users must be verified before authenticating.",
         "operationId": "authenticate",
@@ -73,7 +96,7 @@
                     },
                     "role": {
                       "type": "string",
-                      "example": "Admin"
+                      "example": "User"
                     },
                     "created": {
                       "type": "string",
@@ -113,6 +136,7 @@
     },
     "/users/refresh-token": {
       "post": {
+        "tags": ["users"],
         "summary": "Use a refresh token to generate a new JWT token and a new refresh token",
         "description": "The refresh token is sent and returned via cookies.",
         "operationId": "refreshToken",
@@ -204,10 +228,11 @@
         }
       }
     },
-    "/accounts/revoke-token": {
+    "/users/revoke-token": {
       "post": {
+        "tags": ["users"],
         "summary": "Revoke a refresh token",
-        "description": "Admin users can revoke the tokens of any account, regular users can only revoke their own tokens.",
+        "description": "Admin users can revoke the tokens of any user, regular users can only revoke their own tokens.",
         "operationId": "revokeToken",
         "security": [
           {
@@ -258,7 +283,7 @@
             }
           },
           "400": {
-            "description": "The refresh token is invalid",
+            "description": "The refresh token is not provided or is invalid",
             "content": {
               "application/json": {
                 "schema": {
@@ -279,10 +304,11 @@
         }
       }
     },
-    "/accounts/register": {
+    "/users/register": {
       "post": {
+        "tags": ["users"],
         "summary": "Register a new user account and send a verification email",
-        "description": "The first account registered in the system is assigned the `Admin` role, other accounts are assigned the `User` role.",
+        "description": "The first registered user in the system is assigned the `Admin` role, other users are assigned the `User` role by default.",
         "operationId": "register",
         "requestBody": {
           "required": true,
@@ -291,36 +317,31 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "example": "Mr"
-                  },
                   "firstName": {
                     "type": "string",
-                    "example": "Jason"
+                    "example": "Joe"
                   },
                   "lastName": {
                     "type": "string",
-                    "example": "Watmore"
+                    "example": "Smith"
                   },
                   "email": {
                     "type": "string",
-                    "example": "jason@example.com"
+                    "example": "joe@mail.com"
                   },
                   "password": {
                     "type": "string",
-                    "example": "pass123"
+                    "example": "some_password!"
                   },
                   "confirmPassword": {
                     "type": "string",
-                    "example": "pass123"
+                    "example": "some_password!"
                   },
                   "acceptTerms": {
                     "type": "boolean"
                   }
                 },
                 "required": [
-                  "title",
                   "firstName",
                   "lastName",
                   "email",
@@ -348,12 +369,29 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The registration request was unsuccessful to the email address already being in use by another user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email is already registered with an existing user."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/accounts/verify-email": {
+    "/users/verify-email": {
       "post": {
+        "tags": ["users"],
         "summary": "Verify a new account with a verification token received by email after registration",
         "operationId": "verifyEmail",
         "requestBody": {
@@ -399,7 +437,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Verification failed"
+                      "example": "Email Verification failed due to invalid token."
                     }
                   }
                 }
@@ -411,7 +449,8 @@
     },
     "/accounts/forgot-password": {
       "post": {
-        "summary": "Submit email address to reset the password on an account",
+        "tags": ["users"],
+        "summary": "Submit email address to reset the password on a user account",
         "operationId": "forgotPassword",
         "requestBody": {
           "required": true,
@@ -422,7 +461,7 @@
                 "properties": {
                   "email": {
                     "type": "string",
-                    "example": "jason@example.com"
+                    "example": "joe@mail.com"
                   }
                 },
                 "required": ["email"]
@@ -432,7 +471,7 @@
         },
         "responses": {
           "200": {
-            "description": "The request was received and an email has been sent to the specified address with password reset instructions (if the email address is associated with an account)",
+            "description": "The request was received and an email has been sent to the specified address with password reset instructions (if the email address is associated with a user)",
             "content": {
               "application/json": {
                 "schema": {
@@ -446,12 +485,29 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The request was received, but the provided email is not associated with a user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Could not validate a user account associated with the provided email address."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/accounts/validate-reset-token": {
+    "/users/validate-reset-token": {
       "post": {
+        "tags": ["users"],
         "summary": "Validate the reset password token received by email after submitting to the /accounts/forgot-password route",
         "operationId": "validateResetToken",
         "requestBody": {
@@ -497,7 +553,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Invalid token"
+                      "example": "Invalid reset token"
                     }
                   }
                 }
@@ -507,8 +563,9 @@
         }
       }
     },
-    "/accounts/reset-password": {
+    "/users/reset-password": {
       "post": {
+        "tags": ["users"],
         "summary": "Reset the password for an account",
         "operationId": "resetPassword",
         "requestBody": {
@@ -562,7 +619,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Invalid token"
+                      "example": "Invalid reset token"
                     }
                   }
                 }
@@ -572,8 +629,9 @@
         }
       }
     },
-    "/accounts": {
+    "/users": {
       "get": {
+        "tags": ["users"],
         "summary": "Get a list of all accounts",
         "description": "Restricted to admin users.",
         "operationId": "getAllAccounts",
@@ -596,25 +654,21 @@
                         "type": "string",
                         "example": "5eb12e197e06a76ccdefc121"
                       },
-                      "title": {
-                        "type": "string",
-                        "example": "Mr"
-                      },
                       "firstName": {
                         "type": "string",
-                        "example": "Jason"
+                        "example": "Joe"
                       },
                       "lastName": {
                         "type": "string",
-                        "example": "Watmore"
+                        "example": "Smith"
                       },
                       "email": {
                         "type": "string",
-                        "example": "jason@example.com"
+                        "example": "joe@mail.com"
                       },
                       "role": {
                         "type": "string",
-                        "example": "Admin"
+                        "example": "User"
                       },
                       "created": {
                         "type": "string",
@@ -636,6 +690,7 @@
         }
       },
       "post": {
+        "tags": ["users"],
         "summary": "Create a new account",
         "description": "Restricted to admin users.",
         "operationId": "createAccount",
@@ -651,29 +706,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "example": "Mr"
-                  },
                   "firstName": {
                     "type": "string",
-                    "example": "Jason"
+                    "example": "Joe"
                   },
                   "lastName": {
                     "type": "string",
-                    "example": "Watmore"
+                    "example": "Smith"
                   },
                   "email": {
                     "type": "string",
-                    "example": "jason@example.com"
+                    "example": "joe@mail.com"
                   },
                   "password": {
                     "type": "string",
-                    "example": "pass123"
+                    "example": "some_password!"
                   },
                   "confirmPassword": {
                     "type": "string",
-                    "example": "pass123"
+                    "example": "some_password!"
                   },
                   "role": {
                     "type": "string",
@@ -681,7 +732,6 @@
                   }
                 },
                 "required": [
-                  "title",
                   "firstName",
                   "lastName",
                   "email",
@@ -695,7 +745,7 @@
         },
         "responses": {
           "200": {
-            "description": "Account created successfully, verification is not required for accounts created with this endpoint. The details of the new account are returned.",
+            "description": "User created successfully, verification is not required for users created with this endpoint. The details of the new user are returned.",
             "content": {
               "application/json": {
                 "schema": {
@@ -705,25 +755,21 @@
                       "type": "string",
                       "example": "5eb12e197e06a76ccdefc121"
                     },
-                    "title": {
-                      "type": "string",
-                      "example": "Mr"
-                    },
                     "firstName": {
                       "type": "string",
-                      "example": "Jason"
+                      "example": "Joe"
                     },
                     "lastName": {
                       "type": "string",
-                      "example": "Watmore"
+                      "example": "Smith"
                     },
                     "email": {
                       "type": "string",
-                      "example": "jason@example.com"
+                      "example": "joe@smith.com"
                     },
                     "role": {
                       "type": "string",
-                      "example": "Admin"
+                      "example": "User"
                     },
                     "created": {
                       "type": "string",
@@ -743,7 +789,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Email 'jason@example.com' is already registered"
+                      "example": "Email 'joe@mail.com' is already registered"
                     }
                   }
                 }
@@ -756,7 +802,7 @@
         }
       }
     },
-    "/accounts/{id}": {
+    "/users/{id}": {
       "parameters": [
         {
           "in": "path",
@@ -770,6 +816,7 @@
         }
       ],
       "get": {
+        "tags": ["users"],
         "summary": "Get a single account by id",
         "description": "Admin users can access any account, regular users are restricted to their own account.",
         "operationId": "getAccountById",
@@ -790,25 +837,21 @@
                       "type": "string",
                       "example": "5eb12e197e06a76ccdefc121"
                     },
-                    "title": {
-                      "type": "string",
-                      "example": "Mr"
-                    },
                     "firstName": {
                       "type": "string",
-                      "example": "Jason"
+                      "example": "Joe"
                     },
                     "lastName": {
                       "type": "string",
-                      "example": "Watmore"
+                      "example": "Smith"
                     },
                     "email": {
                       "type": "string",
-                      "example": "jason@example.com"
+                      "example": "joe@mail.com"
                     },
                     "role": {
                       "type": "string",
-                      "example": "Admin"
+                      "example": "User"
                     },
                     "created": {
                       "type": "string",
@@ -832,7 +875,8 @@
         }
       },
       "put": {
-        "summary": "Update an account",
+        "tags": ["users"],
+        "summary": "Update a user account",
         "description": "Admin users can update any account including role, regular users are restricted to their own account and cannot update role.",
         "operationId": "updateAccount",
         "security": [
@@ -847,29 +891,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "example": "Mr"
-                  },
                   "firstName": {
                     "type": "string",
-                    "example": "Jason"
+                    "example": "Joe"
                   },
                   "lastName": {
                     "type": "string",
-                    "example": "Watmore"
+                    "example": "Smith"
                   },
                   "email": {
                     "type": "string",
-                    "example": "jason@example.com"
+                    "example": "joe@mail.com"
                   },
                   "password": {
                     "type": "string",
-                    "example": "pass123"
+                    "example": "some_password!"
                   },
                   "confirmPassword": {
                     "type": "string",
-                    "example": "pass123"
+                    "example": "some_password!"
                   },
                   "role": {
                     "type": "string",
@@ -882,7 +922,7 @@
         },
         "responses": {
           "200": {
-            "description": "Account updated successfully. The details of the updated account are returned.",
+            "description": "User updated successfully. The details of the updated user are returned.",
             "content": {
               "application/json": {
                 "schema": {
@@ -892,25 +932,21 @@
                       "type": "string",
                       "example": "5eb12e197e06a76ccdefc121"
                     },
-                    "title": {
-                      "type": "string",
-                      "example": "Mr"
-                    },
                     "firstName": {
                       "type": "string",
-                      "example": "Jason"
+                      "example": "Joe"
                     },
                     "lastName": {
                       "type": "string",
-                      "example": "Watmore"
+                      "example": "Smith"
                     },
                     "email": {
                       "type": "string",
-                      "example": "jason@example.com"
+                      "example": "joe@mail.com"
                     },
                     "role": {
                       "type": "string",
-                      "example": "Admin"
+                      "example": "User"
                     },
                     "created": {
                       "type": "string",
@@ -934,7 +970,8 @@
         }
       },
       "delete": {
-        "summary": "Delete an account",
+        "tags": ["users"],
+        "summary": "Delete a user account",
         "description": "Admin users can delete any account, regular users are restricted to their own account.",
         "operationId": "deleteAccount",
         "security": [
@@ -944,7 +981,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Account deleted successfully",
+            "description": "User deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -952,7 +989,415 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Account deleted successfully"
+                      "example": "User deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User to delete cannot be found with the given id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/watchlist": {
+      "get": {
+        "tags": ["watchlist"],
+        "summary": "Get a list of all accounts",
+        "description": "Restricted to admin users.",
+        "operationId": "getAllAccounts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of all accounts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "5eb12e197e06a76ccdefc121"
+                      },
+                      "firstName": {
+                        "type": "string",
+                        "example": "Joe"
+                      },
+                      "lastName": {
+                        "type": "string",
+                        "example": "Smith"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "joe@mail.com"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "User"
+                      },
+                      "created": {
+                        "type": "string",
+                        "example": "2020-05-05T09:12:57.848Z"
+                      },
+                      "updated": {
+                        "type": "string",
+                        "example": "2020-05-08T03:11:21.553Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["watchlist"],
+        "summary": "Create a watchlist item",
+        "description": "Restricted to admin users.",
+        "operationId": "createAccount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Joe"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Smith"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "joe@mail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "some_password!"
+                  },
+                  "confirmPassword": {
+                    "type": "string",
+                    "example": "some_password!"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["Admin", "User"]
+                  }
+                },
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "email",
+                  "password",
+                  "confirmPassword",
+                  "role"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created successfully, verification is not required for users created with this endpoint. The details of the new user are returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "5eb12e197e06a76ccdefc121"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "Joe"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Smith"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "joe@smith.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "User"
+                    },
+                    "created": {
+                      "type": "string",
+                      "example": "2020-05-05T09:12:57.848Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email is already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email 'joe@mail.com' is already registered"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "description": "Account id",
+          "required": true,
+          "example": "5eb12e197e06a76ccdefc121",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": ["users"],
+        "summary": "Get a single account by id",
+        "description": "Admin users can access any account, regular users are restricted to their own account.",
+        "operationId": "getAccountById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the specified account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "5eb12e197e06a76ccdefc121"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "Joe"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Smith"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "joe@mail.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "User"
+                    },
+                    "created": {
+                      "type": "string",
+                      "example": "2020-05-05T09:12:57.848Z"
+                    },
+                    "updated": {
+                      "type": "string",
+                      "example": "2020-05-08T03:11:21.553Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["users"],
+        "summary": "Update a user account",
+        "description": "Admin users can update any account including role, regular users are restricted to their own account and cannot update role.",
+        "operationId": "updateAccount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Joe"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Smith"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "joe@mail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "some_password!"
+                  },
+                  "confirmPassword": {
+                    "type": "string",
+                    "example": "some_password!"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["Admin", "User"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully. The details of the updated user are returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "5eb12e197e06a76ccdefc121"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "Joe"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Smith"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "joe@mail.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "User"
+                    },
+                    "created": {
+                      "type": "string",
+                      "example": "2020-05-05T09:12:57.848Z"
+                    },
+                    "updated": {
+                      "type": "string",
+                      "example": "2020-05-08T03:11:21.553Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Delete a user account",
+        "description": "Admin users can delete any account, regular users are restricted to their own account.",
+        "operationId": "deleteAccount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User to delete cannot be found with the given id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
                     }
                   }
                 }

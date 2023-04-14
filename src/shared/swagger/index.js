@@ -1,9 +1,13 @@
 const { Router } = require("express");
 const swaggerUi = require("swagger-ui-express");
-const swaggerJson = require("../../../config/swagger.json");
+const swaggerJson = require("../../../docs/swagger.json");
 
 const router = Router();
 
-router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerJson));
+const swaggerOptions = {
+  explorer: true,
+};
+
+router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerJson, swaggerOptions));
 
 module.exports = router;

@@ -7,6 +7,7 @@ const { isValidId } = require("../../shared/db/db.utils");
 const { sendEmail } = require("../../shared/emailer");
 const UserModel = require("./user.model");
 const RefreshTokenModel = require("../tokens/refreshToken.model");
+const { ValidationError } = require("../../shared/errors");
 
 // TODO: jsDoc all
 
@@ -18,7 +19,7 @@ async function authenticate({ email, password, ipAddress }) {
     !userDTO.isVerified ||
     !bcrypt.compareSync(password, userDTO.passwordHash)
   ) {
-    throw new Error("Email or password is incorrect");
+    throw new ValidationError("Email or password is incorrect");
   }
 
   // authentication successful so generate jwt and refresh tokens
@@ -74,7 +75,10 @@ async function register(newUserDetails, origin) {
   // validate
   if (userDTO) {
     // send already registered error in email to prevent account enumeration
-    return await sendAlreadyRegisteredEmail(newUserDetails.email, origin);
+    await sendAlreadyRegisteredEmail(newUserDetails.email, origin);
+    throw new ValidationError(
+      "Email is already registered with an existing user."
+    );
   }
 
   // create account object
@@ -102,7 +106,10 @@ async function register(newUserDetails, origin) {
 async function verifyEmail({ token }) {
   const userDTO = await UserModel.findOne({ verificationToken: token });
 
-  if (!userDTO) throw new Error("Email Verification failed");
+  if (!userDTO)
+    throw new ValidationError(
+      "Email Verification failed due to invalid token."
+    );
 
   userDTO.verified = Date.now();
   userDTO.verificationToken = undefined;
@@ -113,7 +120,9 @@ async function forgotPassword({ email }, origin) {
   const userDTO = await UserModel.findOne({ email });
 
   // always return ok response to prevent email enumeration
-  if (!userDTO) return;
+  if (!userDTO) {
+    throw new ValidationError("Could not validate a user account associated with the provided email address.")
+  };
 
   // create reset token that expires after 24 hours
   userDTO.resetToken = {
@@ -132,7 +141,7 @@ async function validateResetToken({ token }) {
     "resetToken.expires": { $gt: Date.now() },
   });
 
-  if (!userDTO) throw new Error("Invalid reset token");
+  if (!userDTO) throw new ValidationError("Invalid reset token");
 }
 
 async function resetPassword({ token, password }) {
@@ -141,7 +150,7 @@ async function resetPassword({ token, password }) {
     "resetToken.expires": { $gt: Date.now() },
   });
 
-  if (!userDTO) throw new Error("Invalid reset token");
+  if (!userDTO) throw new ValidationError("Invalid reset token");
 
   // update password and remove reset token
   userDTO.passwordHash = hash(password);
@@ -160,7 +169,7 @@ async function create(newUserDetails) {
 
   // validate
   if (userDTO) {
-    throw new Error(
+    throw new ValidationError(
       'Email "' + newUserDetails.email + '" is already registered'
     );
   }
@@ -189,7 +198,9 @@ async function update(id, updateUserDetails) {
     userDTO.email !== updateUserDetails.email &&
     isExistingUser
   ) {
-    throw new Error('Email "' + updateUserDetails.email + '" is already taken');
+    throw new ValidationError(
+      'Email "' + updateUserDetails.email + '" is already taken'
+    );
   }
 
   // hash password if it was entered
@@ -211,9 +222,9 @@ async function remove(id) {
 }
 
 async function getUserById(id) {
-  if (!isValidId(id)) throw new Error("Invalid user id");
+  if (!isValidId(id)) throw new ValidationError("Invalid user id");
   const userDTO = await UserModel.findById(id);
-  if (!userDTO) throw new Error("User not found");
+  if (!userDTO) throw new ValidationError("User not found");
   return userDTO;
 }
 
@@ -221,7 +232,8 @@ async function getRefreshToken(token) {
   const refreshToken = await RefreshTokenModel.findOne({ token }).populate(
     "userId"
   );
-  if (!refreshToken || !refreshToken.isActive) throw new Error("Invalid token");
+  if (!refreshToken || !refreshToken.isActive)
+    throw new ValidationError("Invalid token");
   return refreshToken;
 }
 

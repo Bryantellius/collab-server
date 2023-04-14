@@ -18,7 +18,7 @@ router.get("/", async (req, res, next) => {
 
     let watchlistResult = await watchlistService.getAllByUserId(id);
 
-    res.json(watchlistResult);
+    res.customJson(watchlistResult);
   } catch (err) {
     next(err);
   }
@@ -34,7 +34,7 @@ router.get("/:id", async (req, res, next) => {
       userId
     );
 
-    res.json(watchlistItemResult);
+    res.customJson(watchlistItemResult);
   } catch (err) {
     next(err);
   }
@@ -46,7 +46,7 @@ router.post("/", validateCreateSchema, async (req, res, next) => {
     req.body.userId = userId;
 
     let result = await watchlistService.create(req.body);
-    res.json(result);
+    res.customJson(result);
   } catch (err) {
     next(err);
   }
@@ -60,7 +60,7 @@ router.put("/:id", validateUpdateSchema, async (req, res, next) => {
 
     let result = await watchlistService.update(id, req.body);
 
-    res.json(result);
+    res.customJson(result);
   } catch (err) {
     next(err);
   }
@@ -73,7 +73,7 @@ router.delete("/:id", async (req, res, next) => {
 
     let result = await WatchlistModel.remove(id, userId);
 
-    res.json(result);
+    res.customJson(result);
   } catch (err) {
     next(err);
   }

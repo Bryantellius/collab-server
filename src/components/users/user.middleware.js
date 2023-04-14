@@ -22,7 +22,9 @@ function authorize(roles = []) {
     async function (req, res, next) {
       try {
         if (!req.auth)
-          throw new Error("You must be logged in to access this content.");
+          throw new UnauthorizedError(
+            "You must be logged in to access this content."
+          );
 
         const userDTO = await UserModel.findById(req.auth.id);
         const refreshTokens = await RefreshTokenModel.find({
@@ -31,7 +33,9 @@ function authorize(roles = []) {
 
         if (!userDTO || (roles.length && !roles.includes(userDTO.role))) {
           // user no longer exists or role not authorized
-          return res.status(401).json({ message: "Unauthorized" });
+          throw new UnauthorizedError(
+            "You lack the permissions to perform this action."
+          );
         }
 
         // authentication and authorization successful

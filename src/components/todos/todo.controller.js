@@ -8,37 +8,18 @@ const router = Router();
 // protects all following routes with auth check
 // router.use(authorize());
 
-/**
- * @openapi
- * /todos:
- *   get:
- *     summary: Retrieve a list of todo items for a given user
- *     description: Returns a list of todo items
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
- */
 router.get("/", async (req, res, next) => {
   try {
     let { username } = req.user;
 
     let userTodosResult = await TodoModel.find({ username });
 
-    res.json(userTodosResult);
+    res.customJson(userTodosResult);
   } catch (err) {
     next(err);
   }
 });
 
-/**
- * @openapi
- * /todos/{id}:
- *   get:
- *     description: Welcome to swagger-jsdoc!
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
- */
 router.get("/:id", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -47,16 +28,12 @@ router.get("/:id", async (req, res, next) => {
 
     let userTodoResult = await TodoModel.findOne({ _id, username });
 
-    res.json(userTodoResult);
+    res.customJson(userTodoResult);
   } catch (err) {
     next(err);
   }
 });
 
-/**
- * @openapi
- * TODO
- */
 router.post("/", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -71,16 +48,12 @@ router.post("/", async (req, res, next) => {
 
     let newTodoResult = await TodoModel.create(todoDTO);
 
-    res.json(newTodoResult);
+    res.customJson(newTodoResult);
   } catch (err) {
     next(err);
   }
 });
 
-/**
- * @openapi
- * TODO
- */
 router.put("/:id", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -103,16 +76,12 @@ router.put("/:id", async (req, res, next) => {
       }
     );
 
-    res.json(updatedTodoResult);
+    res.customJson(updatedTodoResult);
   } catch (err) {
     next(err);
   }
 });
 
-/**
- * @openapi
- * TODO
- */
 router.delete("/:id", async (req, res, next) => {
   try {
     let { username } = req.user;
@@ -120,7 +89,7 @@ router.delete("/:id", async (req, res, next) => {
 
     let deletedTodoResult = await TodoModel.remove({ _id, username });
 
-    res.json(deletedTodoResult);
+    res.customJson(deletedTodoResult);
   } catch (err) {
     next(err);
   }

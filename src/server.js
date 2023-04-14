@@ -6,8 +6,10 @@ const cookieParser = require("cookie-parser");
 
 const config = require("../config");
 const routes = require("./routes");
-const { logger, httpLogger } = require("./shared/logger");
+const { httpLogger } = require("./shared/logger");
 const swaggerRouter = require("./shared/swagger");
+const errorHandler = require("./shared/errors/error.middleware");
+const { normalizeResponseMiddleware } = require("./shared/utils");
 
 const app = express();
 
@@ -19,6 +21,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(normalizeResponseMiddleware);
 
 // pino-http logger
 app.use(httpLogger);
@@ -37,14 +40,7 @@ app.use((req, res, next) => {
 });
 
 // Centralized Error Handler
-app.use((err, req, res, next) => {
-  logger.error({
-    msg: err.message,
-    error: { msg: err.message, stack: err.stack },
-  });
-  // TODO: maturize
-  res.status(err.status || 500).json({ msg: err.message, succeeded: false });
-});
+app.use(errorHandler);
 
 server.listen(config.port, async () => {
   console.log(`✅ Server running on port ${config.port}`);
