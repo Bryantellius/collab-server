@@ -121,8 +121,10 @@ async function forgotPassword({ email }, origin) {
 
   // always return ok response to prevent email enumeration
   if (!userDTO) {
-    throw new ValidationError("Could not validate a user account associated with the provided email address.")
-  };
+    throw new ValidationError(
+      "Could not validate a user account associated with the provided email address."
+    );
+  }
 
   // create reset token that expires after 24 hours
   userDTO.resetToken = {
@@ -242,9 +244,9 @@ function hash(password) {
 }
 
 function generateJwtToken(user) {
-  // create a jwt token containing the user id that expires in 15 minutes
+  // create a jwt token containing the user id that expires in 7 days
   return jwt.sign({ sub: user.id, id: user.id }, config.secret, {
-    expiresIn: "15m",
+    expiresIn: config.constants.jwtExpiration,
   });
 }
 

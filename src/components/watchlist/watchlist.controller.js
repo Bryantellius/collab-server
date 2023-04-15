@@ -68,12 +68,12 @@ router.put("/:id", validateUpdateSchema, async (req, res, next) => {
 
 router.delete("/:id", async (req, res, next) => {
   try {
-    let userId = req.auth.userId;
+    let userId = req.auth.id;
     let id = req.params.id;
 
-    let result = await WatchlistModel.remove(id, userId);
+    await watchlistService.remove(id, userId);
 
-    res.customJson(result);
+    res.customJson("Watchlist item deleted successfully.");
   } catch (err) {
     next(err);
   }

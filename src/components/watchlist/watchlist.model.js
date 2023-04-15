@@ -12,6 +12,14 @@ const WatchlistItemSchema = new Schema({
   dateWatched: { type: Date },
 });
 
+WatchlistItemSchema.set("toJSON", {
+  virtuals: true,
+  versionKey: true,
+  transform: function (doc, ret) {
+    delete ret._id;
+  },
+});
+
 const WatchlistItemModel = model("WatchlistItem", WatchlistItemSchema);
 
 module.exports = WatchlistItemModel;

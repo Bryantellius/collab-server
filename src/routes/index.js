@@ -11,7 +11,7 @@ router.get("/hello", (req, res) => {
 });
 
 router.use("/users", userRouter);
-router.use("/todos", todoRouter);
+// router.use("/todos", todoRouter);
 router.use("/watchlist", watchlistRouter);
 
 module.exports = router;

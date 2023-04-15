@@ -25,10 +25,6 @@
       "description": "Operations for user account management and authentication."
     },
     {
-      "name": "todos",
-      "description": "Operations for todo task management."
-    },
-    {
       "name": "watchlist",
       "description": "Operations for movie watchlist management."
     }
@@ -1024,9 +1020,9 @@
     "/watchlist": {
       "get": {
         "tags": ["watchlist"],
-        "summary": "Get a list of all accounts",
-        "description": "Restricted to admin users.",
-        "operationId": "getAllAccounts",
+        "summary": "Get a list of watchlist items",
+        "description": "Returned list is based on the requesting user",
+        "operationId": "getAllWatchlistItems",
         "security": [
           {
             "bearerAuth": []
@@ -1034,42 +1030,61 @@
         ],
         "responses": {
           "200": {
-            "description": "An array of all accounts",
+            "description": "An array of all watchlist items",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "example": "5eb12e197e06a76ccdefc121"
-                      },
-                      "firstName": {
-                        "type": "string",
-                        "example": "Joe"
-                      },
-                      "lastName": {
-                        "type": "string",
-                        "example": "Smith"
-                      },
-                      "email": {
-                        "type": "string",
-                        "example": "joe@mail.com"
-                      },
-                      "role": {
-                        "type": "string",
-                        "example": "User"
-                      },
-                      "created": {
-                        "type": "string",
-                        "example": "2020-05-05T09:12:57.848Z"
-                      },
-                      "updated": {
-                        "type": "string",
-                        "example": "2020-05-08T03:11:21.553Z"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "5eb12e197e06a76ccdefc121"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "The Fellowship of the Ring"
+                          },
+                          "director": {
+                            "type": "string",
+                            "example": "Peter Jackson"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "example": "Action, Adventure, Drama"
+                          },
+                          "rating": {
+                            "type": "string",
+                            "example": "4"
+                          },
+                          "isWatched": {
+                            "type": "boolean"
+                          },
+                          "dateAdded": {
+                            "type": "string",
+                            "example": "2020-05-05T09:12:57.848Z"
+                          },
+                          "dateUpdated": {
+                            "type": "string",
+                            "example": "2020-05-05T09:12:57.848Z"
+                          },
+                          "dateWatched": {
+                            "type": "string",
+                            "example": "2020-05-05T09:12:57.848Z"
+                          },
+                          "userId": {
+                            "type": "string",
+                            "example": "96g23j197e06a76cdtetp231"
+                          }
+                        }
                       }
+                    },
+                    "succeeded": {
+                      "type": "boolean"
                     }
                   }
                 }
@@ -1084,8 +1099,8 @@
       "post": {
         "tags": ["watchlist"],
         "summary": "Create a watchlist item",
-        "description": "Restricted to admin users.",
-        "operationId": "createAccount",
+        "description": "Users can create watchlist items linked to their account",
+        "operationId": "createWatchlistItem",
         "security": [
           {
             "bearerAuth": []
@@ -1098,74 +1113,90 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "firstName": {
+                  "title": {
                     "type": "string",
-                    "example": "Joe"
+                    "example": "The Fellowship of the Ring"
                   },
-                  "lastName": {
+                  "director": {
                     "type": "string",
-                    "example": "Smith"
+                    "example": "Peter Jackson"
                   },
-                  "email": {
+                  "genre": {
                     "type": "string",
-                    "example": "joe@mail.com"
+                    "example": "Action, Adventure, Drama"
                   },
-                  "password": {
+                  "rating": {
                     "type": "string",
-                    "example": "some_password!"
+                    "example": "4"
                   },
                   "confirmPassword": {
                     "type": "string",
                     "example": "some_password!"
                   },
-                  "role": {
-                    "type": "string",
-                    "enum": ["Admin", "User"]
+                  "isWatched": {
+                    "type": "boolean",
+                    "example": false
                   }
                 },
-                "required": [
-                  "firstName",
-                  "lastName",
-                  "email",
-                  "password",
-                  "confirmPassword",
-                  "role"
-                ]
+                "required": ["title", "director", "genre"]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "User created successfully, verification is not required for users created with this endpoint. The details of the new user are returned.",
+            "description": "Watchlist item created successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "5eb12e197e06a76ccdefc121"
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "5eb12e197e06a76ccdefc121"
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "The Fellowship of the Ring"
+                        },
+                        "director": {
+                          "type": "string",
+                          "example": "Peter Jackson"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "example": "Action, Adventure, Drama"
+                        },
+                        "rating": {
+                          "type": "string",
+                          "example": "4"
+                        },
+                        "isWatched": {
+                          "type": "boolean"
+                        },
+                        "dateAdded": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "dateUpdated": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "dateWatched": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "example": "96g23j197e06a76cdtetp231"
+                        }
+                      }
                     },
-                    "firstName": {
-                      "type": "string",
-                      "example": "Joe"
-                    },
-                    "lastName": {
-                      "type": "string",
-                      "example": "Smith"
-                    },
-                    "email": {
-                      "type": "string",
-                      "example": "joe@smith.com"
-                    },
-                    "role": {
-                      "type": "string",
-                      "example": "User"
-                    },
-                    "created": {
-                      "type": "string",
-                      "example": "2020-05-05T09:12:57.848Z"
+                    "succeeded": {
+                      "type": "boolean"
                     }
                   }
                 }
@@ -1173,15 +1204,19 @@
             }
           },
           "400": {
-            "description": "Email is already registered",
+            "description": "Invalid items details",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
+                    "data": {
                       "type": "string",
-                      "example": "Email 'joe@mail.com' is already registered"
+                      "example": "Validation error: \"title\" is required"
+                    },
+                    "succeeded": {
+                      "type": "boolean",
+                      "example": "false"
                     }
                   }
                 }
@@ -1194,12 +1229,12 @@
         }
       }
     },
-    "/users/{id}": {
+    "/watchlist/{id}": {
       "parameters": [
         {
           "in": "path",
           "name": "id",
-          "description": "Account id",
+          "description": "Watchlist Item id",
           "required": true,
           "example": "5eb12e197e06a76ccdefc121",
           "schema": {
@@ -1208,10 +1243,10 @@
         }
       ],
       "get": {
-        "tags": ["users"],
-        "summary": "Get a single account by id",
-        "description": "Admin users can access any account, regular users are restricted to their own account.",
-        "operationId": "getAccountById",
+        "tags": ["watchlist"],
+        "summary": "Get a single watchlist item by id",
+        "description": "Users can access a single watchlist item associated with their account",
+        "operationId": "getWatchlistItemById",
         "security": [
           {
             "bearerAuth": []
@@ -1219,39 +1254,58 @@
         ],
         "responses": {
           "200": {
-            "description": "Details of the specified account",
+            "description": "Details of the specified watchlist item",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "5eb12e197e06a76ccdefc121"
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "5eb12e197e06a76ccdefc121"
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "The Fellowship of the Ring"
+                        },
+                        "director": {
+                          "type": "string",
+                          "example": "Peter Jackson"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "example": "Action, Adventure, Drama"
+                        },
+                        "rating": {
+                          "type": "string",
+                          "example": "4"
+                        },
+                        "isWatched": {
+                          "type": "boolean"
+                        },
+                        "dateAdded": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "dateUpdated": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "dateWatched": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "example": "96g23j197e06a76cdtetp231"
+                        }
+                      }
                     },
-                    "firstName": {
-                      "type": "string",
-                      "example": "Joe"
-                    },
-                    "lastName": {
-                      "type": "string",
-                      "example": "Smith"
-                    },
-                    "email": {
-                      "type": "string",
-                      "example": "joe@mail.com"
-                    },
-                    "role": {
-                      "type": "string",
-                      "example": "User"
-                    },
-                    "created": {
-                      "type": "string",
-                      "example": "2020-05-05T09:12:57.848Z"
-                    },
-                    "updated": {
-                      "type": "string",
-                      "example": "2020-05-08T03:11:21.553Z"
+                    "succeeded": {
+                      "type": "boolean"
                     }
                   }
                 }
@@ -1267,10 +1321,10 @@
         }
       },
       "put": {
-        "tags": ["users"],
-        "summary": "Update a user account",
-        "description": "Admin users can update any account including role, regular users are restricted to their own account and cannot update role.",
-        "operationId": "updateAccount",
+        "tags": ["watchlist"],
+        "summary": "Update a watchlist item",
+        "description": "Users can update a single watchlist item associated with their account",
+        "operationId": "updateWatchlistItem",
         "security": [
           {
             "bearerAuth": []
@@ -1283,29 +1337,29 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "firstName": {
+                  "title": {
                     "type": "string",
-                    "example": "Joe"
+                    "example": "The Fellowship of the Ring"
                   },
-                  "lastName": {
+                  "director": {
                     "type": "string",
-                    "example": "Smith"
+                    "example": "Peter Jackson"
                   },
-                  "email": {
+                  "genre": {
                     "type": "string",
-                    "example": "joe@mail.com"
+                    "example": "Action, Adventure, Drama"
                   },
-                  "password": {
+                  "rating": {
                     "type": "string",
-                    "example": "some_password!"
+                    "example": "4"
                   },
                   "confirmPassword": {
                     "type": "string",
                     "example": "some_password!"
                   },
-                  "role": {
-                    "type": "string",
-                    "enum": ["Admin", "User"]
+                  "isWatched": {
+                    "type": "boolean",
+                    "example": false
                   }
                 }
               }
@@ -1314,39 +1368,78 @@
         },
         "responses": {
           "200": {
-            "description": "User updated successfully. The details of the updated user are returned.",
+            "description": "Watchlist item updated successfully. The details of the updated watchlist item are returned.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "5eb12e197e06a76ccdefc121"
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "5eb12e197e06a76ccdefc121"
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "The Fellowship of the Ring"
+                        },
+                        "director": {
+                          "type": "string",
+                          "example": "Peter Jackson"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "example": "Action, Adventure, Drama"
+                        },
+                        "rating": {
+                          "type": "string",
+                          "example": "4"
+                        },
+                        "isWatched": {
+                          "type": "boolean"
+                        },
+                        "dateAdded": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "dateUpdated": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "dateWatched": {
+                          "type": "string",
+                          "example": "2020-05-05T09:12:57.848Z"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "example": "96g23j197e06a76cdtetp231"
+                        }
+                      }
                     },
-                    "firstName": {
+                    "succeeded": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid items details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
                       "type": "string",
-                      "example": "Joe"
+                      "example": "Validation error: \"title\" is required"
                     },
-                    "lastName": {
-                      "type": "string",
-                      "example": "Smith"
-                    },
-                    "email": {
-                      "type": "string",
-                      "example": "joe@mail.com"
-                    },
-                    "role": {
-                      "type": "string",
-                      "example": "User"
-                    },
-                    "created": {
-                      "type": "string",
-                      "example": "2020-05-05T09:12:57.848Z"
-                    },
-                    "updated": {
-                      "type": "string",
-                      "example": "2020-05-08T03:11:21.553Z"
+                    "succeeded": {
+                      "type": "boolean",
+                      "example": "false"
                     }
                   }
                 }
@@ -1362,10 +1455,10 @@
         }
       },
       "delete": {
-        "tags": ["users"],
-        "summary": "Delete a user account",
-        "description": "Admin users can delete any account, regular users are restricted to their own account.",
-        "operationId": "deleteAccount",
+        "tags": ["watchlist"],
+        "summary": "Delete a watchlist item",
+        "description": "Users can delete a single watchlist item associated with their account",
+        "operationId": "deleteWatchlistItem",
         "security": [
           {
             "bearerAuth": []
@@ -1373,15 +1466,18 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully",
+            "description": "Watchlist item deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
+                    "data": {
                       "type": "string",
-                      "example": "User deleted successfully"
+                      "example": "Watchlist item deleted successfully"
+                    },
+                    "succeeded": {
+                      "type": "boolean"
                     }
                   }
                 }
@@ -1389,7 +1485,7 @@
             }
           },
           "400": {
-            "description": "User to delete cannot be found with the given id.",
+            "description": "Watchlist item does not exist",
             "content": {
               "application/json": {
                 "schema": {

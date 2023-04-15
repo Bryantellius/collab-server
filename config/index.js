@@ -18,7 +18,8 @@ module.exports = {
       ADMIN: "Admin",
       USER: "User",
     },
-    expirationDate: 7 * 24 * 60 * 60 * 1000,
+    refreshTokenExpiration: 7 * 24 * 60 * 60 * 1000,
+    jwtExpiration: "7d",
   },
   email: {
     name: process.env.EMAIL_NAME,
